@@ -19,6 +19,10 @@ jobs:
               python3-pip python3-setuptools python3-wheel xz-utils file make gcc
           pip3 install west
 
+      - name: Clean up previous folders if any
+        run: |
+          rm -rf zmk zephyr modules build .west
+
       - name: Initialize West and ZMK
         run: |
           west init -l .
