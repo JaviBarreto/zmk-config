@@ -25,17 +25,17 @@ jobs:
 
       - name: Initialize West from config/
         run: |
-          west init -l .
+          west init -l . 
           west update
           west zephyr-export
 
       - name: Build Left Side
         run: |
-          west build -s config/zmk -d build/cradio_left -b nice_nano_v2 -- -DSHIELD=cradio_left
+          west build -s zmk -d build/cradio_left -b nice_nano_v2 -- -DSHIELD=cradio_left
 
       - name: Build Right Side
         run: |
-          west build -s config/zmk -d build/cradio_right -b nice_nano_v2 -- -DSHIELD=cradio_right
+          west build -s zmk -d build/cradio_right -b nice_nano_v2 -- -DSHIELD=cradio_right
 
       - name: Upload firmware to GitHub Release
         uses: softprops/action-gh-release@v1
