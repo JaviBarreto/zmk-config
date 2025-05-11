@@ -1,4 +1,4 @@
-name: Build ZMK firmware and publish release
+name: Build ZMK firmware with west.yml in config/ and publish release
 
 on:
   push:
@@ -23,19 +23,19 @@ jobs:
         run: |
           rm -rf zmk zephyr modules build .west
 
-      - name: Initialize West and ZMK
+      - name: Initialize West from config/
         run: |
-          west init -l .
+          west init -l config
           west update
           west zephyr-export
 
       - name: Build Left Side
         run: |
-          west build -s zmk -d build/cradio_left -b nice_nano_v2 -- -DSHIELD=cradio_left
+          west build -s config/zmk -d build/cradio_left -b nice_nano_v2 -- -DSHIELD=cradio_left
 
       - name: Build Right Side
         run: |
-          west build -s zmk -d build/cradio_right -b nice_nano_v2 -- -DSHIELD=cradio_right
+          west build -s config/zmk -d build/cradio_right -b nice_nano_v2 -- -DSHIELD=cradio_right
 
       - name: Upload firmware to GitHub Release
         uses: softprops/action-gh-release@v1
