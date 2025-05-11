@@ -1,4 +1,4 @@
-name: Build ZMK firmware
+name: Build ZMK firmware and publish release
 
 on:
   push:
@@ -15,7 +15,8 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install -y git cmake ninja-build gperf dfu-util device-tree-compiler wget               python3-pip python3-setuptools python3-wheel xz-utils file make gcc
+          sudo apt install -y git cmake ninja-build gperf dfu-util device-tree-compiler wget \
+              python3-pip python3-setuptools python3-wheel xz-utils file make gcc
           pip3 install west
 
       - name: Initialize West and ZMK
@@ -26,18 +27,18 @@ jobs:
 
       - name: Build Left Side
         run: |
-          west build -s zmk -d build/chocofi_left -b nice_nano_v2 -- -DSHIELD=chocofi_left
+          west build -s zmk -d build/cradio_left -b nice_nano_v2 -- -DSHIELD=cradio_left
 
       - name: Build Right Side
         run: |
-          west build -s zmk -d build/chocofi_right -b nice_nano_v2 -- -DSHIELD=chocofi_right
+          west build -s zmk -d build/cradio_right -b nice_nano_v2 -- -DSHIELD=cradio_right
 
-      - name: Upload release
+      - name: Upload firmware to GitHub Release
         uses: softprops/action-gh-release@v1
         if: success()
         with:
           name: "Chocofi Firmware - ${{ github.sha }}"
           tag_name: "chocofi-${{ github.sha }}"
           files: |
-            build/chocofi_left/zephyr/zmk.uf2
-            build/chocofi_right/zephyr/zmk.uf2
+            build/cradio_left/zephyr/zmk.uf2
+            build/cradio_right/zephyr/zmk.uf2
