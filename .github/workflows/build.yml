@@ -1,6 +1,43 @@
 name: Build ZMK firmware
-on: [push, pull_request, workflow_dispatch]
+
+on:
+  push:
+    branches: [main]
 
 jobs:
   build:
-    uses: zmkfirmware/zmk/.github/workflows/build-user-config.yml@main
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout this config repo
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y git cmake ninja-build gperf dfu-util device-tree-compiler wget               python3-pip python3-setuptools python3-wheel xz-utils file make gcc
+          pip3 install west
+
+      - name: Initialize West and ZMK
+        run: |
+          west init -l .
+          west update
+          west zephyr-export
+
+      - name: Build Left Side
+        run: |
+          west build -s zmk -d build/chocofi_left -b nice_nano_v2 -- -DSHIELD=chocofi_left
+
+      - name: Build Right Side
+        run: |
+          west build -s zmk -d build/chocofi_right -b nice_nano_v2 -- -DSHIELD=chocofi_right
+
+      - name: Upload release
+        uses: softprops/action-gh-release@v1
+        if: success()
+        with:
+          name: "Chocofi Firmware - ${{ github.sha }}"
+          tag_name: "chocofi-${{ github.sha }}"
+          files: |
+            build/chocofi_left/zephyr/zmk.uf2
+            build/chocofi_right/zephyr/zmk.uf2
