@@ -1,48 +1,6 @@
-name: Build ZMK firmware with west.yml in config/ and publish release
-
-on:
-  push:
-    branches: [main]
+name: Build ZMK firmware
+on: [push, pull_request, workflow_dispatch]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout this config repo
-        uses: actions/checkout@v3
-
-      - name: Install dependencies
-        run: |
-          sudo apt update
-          sudo apt install -y git cmake ninja-build gperf dfu-util device-tree-compiler wget \
-              python3-pip python3-setuptools python3-wheel xz-utils file make gcc
-          pip3 install west
-
-      - name: Clean up previous folders if any
-        run: |
-          rm -rf zmk zephyr modules build .west
-
-      - name: Initialize West from config/
-        run: |
-          west init -l . 
-          west update
-          west zephyr-export
-
-      - name: Build Left Side
-        run: |
-          west build -s zmk -d build/cradio_left -b nice_nano_v2 -- -DSHIELD=cradio_left
-
-      - name: Build Right Side
-        run: |
-          west build -s zmk -d build/cradio_right -b nice_nano_v2 -- -DSHIELD=cradio_right
-
-      - name: Upload firmware to GitHub Release
-        uses: softprops/action-gh-release@v1
-        if: success()
-        with:
-          name: "Chocofi Firmware - ${{ github.sha }}"
-          tag_name: "chocofi-${{ github.sha }}"
-          files: |
-            build/cradio_left/zephyr/zmk.uf2
-            build/cradio_right/zephyr/zmk.uf2
+    uses: zmkfirmware/zmk/.github/workflows/build-user-config.yml@main
